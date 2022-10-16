@@ -5,6 +5,7 @@ namespace Momento\Cache;
 use Momento\Auth\ICredentialProvider;
 use Momento\Cache\CacheOperationTypes\CacheDeleteResponse;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryDeleteResponse;
+use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponse;
 use Momento\Cache\CacheOperationTypes\CacheDictionarySetResponse;
 use Momento\Cache\CacheOperationTypes\CacheGetResponse;
 use Momento\Cache\CacheOperationTypes\CacheListFetchResponse;
@@ -120,6 +121,11 @@ class SimpleCacheClient
     public function dictionarySet(string $cacheName, string $dictionaryName, string $field, string $value, bool $refreshTtl, ?int $ttlSeconds = null): CacheDictionarySetResponse
     {
         return $this->dataClient->dictionarySet($cacheName, $dictionaryName, $field, $value, $refreshTtl, $ttlSeconds);
+    }
+
+    public function dictionaryGet(string $cacheName, string $dictionaryName, string $field): CacheDictionaryGetResponse
+    {
+        return $this->dataClient->dictionaryGet($cacheName, $dictionaryName, $field);
     }
 
     public function dictionaryDelete(string $cacheName, string $dictionaryName): CacheDictionaryDeleteResponse
