@@ -24,6 +24,7 @@ use Grpc\UnaryCall;
 use Momento\Cache\CacheOperationTypes\CacheDeleteResponse;
 use Momento\Cache\CacheOperationTypes\CacheDeleteResponseError;
 use Momento\Cache\CacheOperationTypes\CacheDeleteResponseSuccess;
+use Momento\Cache\CacheOperationTypes\CacheDictionaryDeleteResponse;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryDeleteResponseError;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryDeleteResponseSuccess;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponse;
@@ -442,7 +443,7 @@ class _ScsDataClient
         return new CacheDictionaryGetResponseHit($dictionaryGetResponse);
     }
 
-    public function dictionaryDelete(string $cacheName, string $dictionaryName)
+    public function dictionaryDelete(string $cacheName, string $dictionaryName): CacheDictionaryDeleteResponse
     {
         try {
             validateCacheName($cacheName);
