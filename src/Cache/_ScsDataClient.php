@@ -7,6 +7,7 @@ use Cache_client\_DictionaryDeleteRequest;
 use Cache_client\_DictionaryDeleteRequest\All;
 use Cache_client\_DictionaryFieldValuePair;
 use Cache_client\_DictionaryGetRequest;
+use Cache_client\_DictionaryIncrementRequest;
 use Cache_client\_DictionarySetRequest;
 use Cache_client\_GetRequest;
 use Cache_client\_ListEraseRequest;
@@ -32,6 +33,9 @@ use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponse;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponseError;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponseHit;
 use Momento\Cache\CacheOperationTypes\CacheDictionaryGetResponseMiss;
+use Momento\Cache\CacheOperationTypes\CacheDictionaryIncrementResponse;
+use Momento\Cache\CacheOperationTypes\CacheDictionaryIncrementResponseError;
+use Momento\Cache\CacheOperationTypes\CacheDictionaryIncrementResponseSuccess;
 use Momento\Cache\CacheOperationTypes\CacheDictionarySetResponse;
 use Momento\Cache\CacheOperationTypes\CacheDictionarySetResponseError;
 use Momento\Cache\CacheOperationTypes\CacheDictionarySetResponseSuccess;
@@ -388,6 +392,7 @@ class _ScsDataClient
             validateFieldName($field);
             validateValueName($value);
             $ttlMillis = $this->ttlToMillis($ttlSeconds);
+            validateTtl($ttlMillis);
             $dictionarySetRequest = new _DictionarySetRequest();
             $dictionarySetRequest->setDictionaryName($dictionaryName);
             $dictionarySetRequest->setItems([$this->toSingletonFieldValuePair($field, $value)]);
@@ -456,5 +461,34 @@ class _ScsDataClient
             return new CacheDictionaryDeleteResponseError(new UnknownError($e->getMessage()));
         }
         return new CacheDictionaryDeleteResponseSuccess();
+    }
+
+    public function dictionaryIncrement(
+        string $cacheName, string $dictionaryName, string $field, bool $refreshTtl, int $amount = 1, ?int $ttlSeconds = null
+    ): CacheDictionaryIncrementResponse
+    {
+        try {
+            validateCacheName($cacheName);
+            validateDictionaryName($dictionaryName);
+            validateFieldName($field);
+            $ttlMillis = $this->ttlToMillis($ttlSeconds);
+            validateTtl($ttlMillis);
+            $dictionaryIncrementRequest = new _DictionaryIncrementRequest();
+            $dictionaryIncrementRequest
+                ->setDictionaryName($dictionaryName)
+                ->setField($field)
+                ->setAmount($amount)
+                ->setRefreshTtl($refreshTtl)
+                ->setTtlMilliseconds($ttlMillis);
+            $call = $this->grpcManager->client->DictionaryIncrement(
+                $dictionaryIncrementRequest, ["cache" => [$cacheName]], ["timeout" => $this->deadline_seconds * self::$TIMEOUT_MULTIPLIER]
+            );
+            $response = $this->processCall($call);
+        } catch (SdkError $e) {
+            return new CacheDictionaryIncrementResponseError($e);
+        } catch (Exception $e) {
+            return new CacheDictionaryIncrementResponseError(new UnknownError($e->getMessage()));
+        }
+        return new CacheDictionaryIncrementResponseSuccess($response);
     }
 }

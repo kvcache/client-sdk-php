@@ -3,6 +3,7 @@
 namespace Momento\Cache\CacheOperationTypes;
 
 use Cache_client\_DictionaryGetResponse;
+use Cache_client\_DictionaryIncrementResponse;
 use Cache_client\_GetResponse;
 use Cache_client\_ListFetchResponse;
 use Cache_client\_ListLengthResponse;
@@ -454,7 +455,8 @@ abstract class CacheListPushFrontResponse extends ResponseBase
     }
 }
 
-class CacheListPushFrontResponseSuccess extends CacheListPushFrontResponse {
+class CacheListPushFrontResponseSuccess extends CacheListPushFrontResponse
+{
     private int $listLength;
 
     public function __construct(_ListPushFrontResponse $response)
@@ -463,7 +465,7 @@ class CacheListPushFrontResponseSuccess extends CacheListPushFrontResponse {
         $this->listLength = $response->getListLength();
     }
 
-    public function listLength() : int
+    public function listLength(): int
     {
         return $this->listLength;
     }
@@ -493,7 +495,8 @@ abstract class CacheListPushBackResponse extends ResponseBase
     }
 }
 
-class CacheListPushBackResponseSuccess extends CacheListPushBackResponse {
+class CacheListPushBackResponseSuccess extends CacheListPushBackResponse
+{
     private int $listLength;
 
     public function __construct(_ListPushBackResponse $response)
@@ -502,7 +505,7 @@ class CacheListPushBackResponseSuccess extends CacheListPushBackResponse {
         $this->listLength = $response->getListLength();
     }
 
-    public function listLength() : int
+    public function listLength(): int
     {
         return $this->listLength;
     }
@@ -834,6 +837,52 @@ class CacheDictionaryDeleteResponseSuccess extends CacheDictionaryDeleteResponse
 }
 
 class CacheDictionaryDeleteResponseError extends CacheDictionaryDeleteResponse
+{
+    use ErrorBody;
+}
+
+abstract class CacheDictionaryIncrementResponse extends ResponseBase
+{
+    public function asSuccess(): CacheDictionaryIncrementResponseSuccess|null
+    {
+        if ($this->isSuccess()) {
+            return $this;
+        }
+        return null;
+    }
+
+    public function asError(): CacheDictionaryIncrementResponseError|null
+    {
+        if ($this->isError()) {
+            return $this;
+        }
+        return null;
+    }
+}
+
+class CacheDictionaryIncrementResponseSuccess extends CacheDictionaryIncrementResponse
+{
+
+    private int $value;
+
+    public function __construct(_DictionaryIncrementResponse $response)
+    {
+        parent::__construct();
+        $this->value = $response->getValue();
+    }
+
+    public function value(): int
+    {
+        return $this->value;
+    }
+
+    public function string(): string
+    {
+        return "{$this->value}";
+    }
+}
+
+class CacheDictionaryIncrementResponseError extends CacheDictionaryIncrementResponse
 {
     use ErrorBody;
 }
